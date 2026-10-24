@@ -10,6 +10,7 @@ const { randomUUID } = require("crypto");
 const infractionsService = require("../systems/infractionsService");
 const logger = require("../systems/logger");
 const { handleInfractionAutomation } = require("../systems/automation");
+const { checkAutoKick } = require("../systems/autoKick");
 const { getGuildTrustConfig } = require("../utils/trust");
 const { fetchMember } = require("./discordFetchCache");
 const { getGuild } = require("./guildService");
@@ -148,6 +149,8 @@ async function dashboardWarn({ client, guildId, userId, reason, actor }) {
       (actor ? `\nExecutor (dashboard): **${actor}**` : ""),
     guild,
   );
+
+  await checkAutoKick(client, guild.id, member.id);
 
   return { guild, member, dbUser };
 }

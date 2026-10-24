@@ -927,7 +927,7 @@ window.OzarkLocales.en = {
   giveaways_platforms_warn: "Select at least one platform.",
   giveaways_poll: "Interval (seconds)",
   giveaways_poll_hint: "Recommended: 60–300s.",
-  giveaways_max_cycle: "Maximum posts per check (0 = unlimited)",
+  giveaways_max_cycle: "Maximum posts per check (0 = up to 50)",
   giveaways_only_games_hint:
     "Includes games only; in-game items and beta access are excluded.",
   giveaways_test: "Send test",
@@ -975,7 +975,6 @@ window.OzarkLocales.en = {
     "Add at least one emoji and role pair.",
   features_diagnosis_issue_missing_streamer:
     "Enter a Twitch streamer username.",
-  features_diagnosis_issue_missing_stream_url: "Add a valid stream URL.",
   features_diagnosis_issue_missing_twitch_credentials:
     "Set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET on the bot server.",
   features_diagnosis_issue_missing_stats_metric:
@@ -1020,6 +1019,8 @@ window.OzarkLocales.en = {
   features_announce_channel: "Announcement channel",
   features_ignore_bots: "Ignore bots",
   features_infractions: "Infractions before kick",
+  features_auto_kick_hint:
+    "Counts independent WARN/MUTE incidents retained up to 180 days. A follow-up MUTE after a WARN counts once. The bot needs Kick Members permission.",
   features_xp_min: "Minimum XP",
   features_xp_max: "Maximum XP",
   features_cooldown: "Cooldown between gains (seconds)",
@@ -1031,12 +1032,6 @@ window.OzarkLocales.en = {
   features_twitch_streamer: "Twitch channel username",
   features_twitch_role: "Role to mention (optional)",
   features_placeholder_twitch_streamer: "twitch_username",
-  features_music_play: "Allow /play",
-  features_music_stop: "Allow /stop",
-  features_music_queue: "Allow /queue",
-  features_music_nowplaying: "Allow /nowplaying",
-  features_music_roles: "Roles allowed to use music commands",
-  features_music_roles_hint: "Leave empty to allow every member.",
   features_twitch_credentials_missing:
     "Twitch alerts require TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET on the bot server.",
   features_description: "Description",
@@ -1086,7 +1081,7 @@ window.OzarkLocales.en = {
   feature_reaction_roles_desc: "Grants roles when members react to a message.",
   feature_auto_kick_name: "Automatic kick after infractions",
   feature_auto_kick_desc:
-    "Automatically kicks members that reach the configured infraction count.",
+    "Automatically kicks members after the configured WARN/MUTE case threshold.",
   feature_auto_moderation_name: "AutoMod",
   feature_auto_moderation_desc:
     "Detects configured words and applies WARN/timeout according to this server's rules.",
@@ -1164,9 +1159,6 @@ window.OzarkLocales.en = {
   feature_twitch_name: "Twitch stream alerts",
   feature_twitch_desc:
     "Posts an alert when this Twitch channel goes live. Checks every 30 seconds and can mention one selected role. Requires a Twitch application configured on the bot server.",
-  feature_music_commands_name: "Music commands",
-  feature_music_commands_desc:
-    "Enable or disable music commands and restrict their use to selected roles.",
   features_test_info_twitch_live:
     "Twitch connection verified; the channel is live.",
   features_test_info_twitch_offline:

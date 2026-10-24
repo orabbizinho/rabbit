@@ -4,13 +4,8 @@ const {
   normalizeFeature,
 } = require("../../src/systems/featuresService");
 const { resolveGuildAntiSpamConfig } = require("../../src/systems/antiSpam");
-const {
-  applyPatch,
-  getValue,
-} = require("../../src/systems/configManager");
-const {
-  diagnoseFeature,
-} = require("../../src/dashboard/routes/features");
+const { applyPatch, getValue } = require("../../src/systems/configManager");
+const { diagnoseFeature } = require("../../src/dashboard/routes/features");
 const gameNewsSystem = require("../../src/systems/gamenews");
 
 test("serverStats keeps all metrics enabled for existing guild configs", () => {
@@ -29,14 +24,6 @@ test("serverStats preserves independently disabled metrics", () => {
   eq(feature.showMembers, true);
   eq(feature.showJoins, false);
   eq(feature.showLeaves, false);
-});
-
-test("music commands are available by default and can be role-restricted", () => {
-  const feature = normalizeFeature("musicCommands", null);
-  eq(feature.enabled, true);
-  eq(feature.playEnabled, true);
-  eq(feature.allowedRoleIds.length, 0);
-  eq(FEATURE_DEFAULTS.musicCommands.queueEnabled, true);
 });
 
 test("antiSpam is disabled until configured for a guild", () => {
@@ -116,7 +103,10 @@ test("feature diagnosis flags missing channel setup for memes", async () => {
   });
 
   eq(diagnosis.status, "incomplete");
-  eq(diagnosis.issues.some((issue) => issue.code === "missing_channel"), true);
+  eq(
+    diagnosis.issues.some((issue) => issue.code === "missing_channel"),
+    true,
+  );
 });
 
 test("feature diagnosis flags incomplete serverStats setup", async () => {
@@ -128,11 +118,19 @@ test("feature diagnosis flags incomplete serverStats setup", async () => {
       roles: { cache: new Map() },
     },
     feature: "serverStats",
-    config: { enabled: true, showMembers: false, showJoins: false, showLeaves: false },
+    config: {
+      enabled: true,
+      showMembers: false,
+      showJoins: false,
+      showLeaves: false,
+    },
   });
 
   eq(diagnosis.status, "incomplete");
-  eq(diagnosis.issues.some((issue) => issue.code === "missing_stats_metric"), true);
+  eq(
+    diagnosis.issues.some((issue) => issue.code === "missing_stats_metric"),
+    true,
+  );
 });
 
 test("gameNews accepts a one-minute global interval in milliseconds", () => {

@@ -14,6 +14,7 @@ const {
   getAdaptiveMaxWarnings,
 } = require("../utils/trust");
 const { incrementAutoModActions } = require("./status");
+const { checkAutoKick } = require("./autoKick");
 
 const matcherCache = new Map();
 
@@ -184,6 +185,7 @@ function yesNo(v, lang) {
 }
 
 module.exports = async function autoModeration(message, client) {
+  let autoKickTarget = null;
   try {
     if (!message?.guild) return;
     if (!message?.content) return;
@@ -225,6 +227,7 @@ module.exports = async function autoModeration(message, client) {
       guild.id,
     );
     if (!foundWord) return;
+    message._autoModActionTaken = true;
 
     const perms = message.channel.permissionsFor(botMember);
     const canDelete = perms?.has(PermissionsBitField.Flags.ManageMessages);
@@ -281,6 +284,9 @@ module.exports = async function autoModeration(message, client) {
         source: "automod",
       })
       .catch(() => null);
+    if (infWarn) {
+      autoKickTarget = { guildId: guild.id, userId: message.author.id };
+    }
 
     await message.channel
       .send({
@@ -314,8 +320,6 @@ module.exports = async function autoModeration(message, client) {
       guild,
     );
 
-    // Marcar que o AutoMod já aplicou uma ação punitiva
-    message._autoModActionTaken = true;
     try {
       incrementAutoModActions();
     } catch {}
@@ -393,8 +397,6 @@ module.exports = async function autoModeration(message, client) {
       guild,
     );
 
-    // Marcar que o AutoMod aplicou MUTE nesta mensagem
-    message._autoModActionTaken = true;
     try {
       incrementAutoModActions();
     } catch {}
@@ -404,6 +406,14 @@ module.exports = async function autoModeration(message, client) {
       .catch(() => null);
   } catch (err) {
     console.error("[AutoMod] Critical error:", err);
+  } finally {
+    if (autoKickTarget) {
+      await checkAutoKick(
+        client,
+        autoKickTarget.guildId,
+        autoKickTarget.userId,
+      ).catch(() => null);
+    }
   }
 };
 

@@ -151,7 +151,6 @@ const ALLOWED_PATHS = new Set([
 
   "automation.enabled",
   "automation.autoMute.enabled",
-  "automation.autoMute.warnsToMute",
   "automation.autoMute.muteDurationMs",
 
   "slash.enabled",
@@ -292,9 +291,6 @@ function validateValue(pathStr, value) {
     case "tickets.autoDeleteClosed.delayMs":
       return inRangeInt(value, 0, 365 * 24 * 60 * 60 * 1000);
 
-    // Automation
-    case "automation.autoMute.warnsToMute":
-      return inRangeInt(value, 1, 50);
     case "automation.autoMute.muteDurationMs":
       return inRangeInt(value, 0, 30 * 24 * 60 * 60 * 1000);
 

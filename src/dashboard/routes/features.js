@@ -54,8 +54,6 @@ const FEATURE_FIELD_ISSUES = {
   streamerName: "missing_streamer",
   intervalMinutes: "missing_configuration",
   infractionsToKick: "missing_configuration",
-  voiceChannelId: "missing_channel",
-  streamUrl: "missing_stream_url",
 };
 const FEATURE_CHANNEL_FIELDS = {
   messageLogs: "channelId",
@@ -571,16 +569,6 @@ function cleanFeatureValue(name, raw, sanitizeId) {
         roleId: id(src.roleId),
       };
     }
-
-    case "musicCommands":
-      return {
-        enabled: src.enabled !== false,
-        playEnabled: src.playEnabled !== false,
-        stopEnabled: src.stopEnabled !== false,
-        queueEnabled: src.queueEnabled !== false,
-        nowplayingEnabled: src.nowplayingEnabled !== false,
-        allowedRoleIds: idList(src.allowedRoleIds),
-      };
 
     default:
       return null;

@@ -954,7 +954,7 @@ window.OzarkLocales.pt = {
   giveaways_platforms_warn: "Seleciona pelo menos uma plataforma.",
   giveaways_poll: "Intervalo (segundos)",
   giveaways_poll_hint: "Recomendado: 60–300s.",
-  giveaways_max_cycle: "Máximo por verificação (0 = sem limite)",
+  giveaways_max_cycle: "Máximo por verificação (0 = até 50)",
   giveaways_only_games_hint:
     "Inclui apenas jogos; exclui itens digitais e acesso a versões beta.",
   giveaways_test: "Enviar teste",
@@ -1002,7 +1002,6 @@ window.OzarkLocales.pt = {
     "Adiciona pelo menos um par de emoji e cargo.",
   features_diagnosis_issue_missing_streamer:
     "Indica o nome de utilizador do streamer Twitch.",
-  features_diagnosis_issue_missing_stream_url: "Adiciona uma URL válida para o stream.",
   features_diagnosis_issue_missing_twitch_credentials:
     "Define TWITCH_CLIENT_ID e TWITCH_CLIENT_SECRET no servidor do bot.",
   features_diagnosis_issue_missing_stats_metric:
@@ -1047,6 +1046,8 @@ window.OzarkLocales.pt = {
   features_announce_channel: "Canal de anúncio",
   features_ignore_bots: "Ignorar bots",
   features_infractions: "Infrações até ao kick",
+  features_auto_kick_hint:
+    "Conta incidentes independentes de WARN/MUTE retidos até 180 dias. Um MUTE após um WARN conta uma vez. O bot precisa da permissão Expulsar membros.",
   features_xp_min: "XP mínimo",
   features_xp_max: "XP máximo",
   features_cooldown: "Espera entre ganhos (segundos)",
@@ -1058,12 +1059,6 @@ window.OzarkLocales.pt = {
   features_twitch_streamer: "Nome de utilizador do canal Twitch",
   features_twitch_role: "Cargo a mencionar (opcional)",
   features_placeholder_twitch_streamer: "nome_do_canal_twitch",
-  features_music_play: "Permitir /play",
-  features_music_stop: "Permitir /stop",
-  features_music_queue: "Permitir /queue",
-  features_music_nowplaying: "Permitir /nowplaying",
-  features_music_roles: "Cargos autorizados a usar comandos de música",
-  features_music_roles_hint: "Vazio permite o uso por todos os membros.",
   features_twitch_credentials_missing:
     "Os alertas Twitch precisam de TWITCH_CLIENT_ID e TWITCH_CLIENT_SECRET no servidor do bot.",
   features_description: "Descrição",
@@ -1114,7 +1109,7 @@ window.OzarkLocales.pt = {
     "Atribui cargos quando os membros reagem a uma mensagem.",
   feature_auto_kick_name: "Expulsão automática após infrações",
   feature_auto_kick_desc:
-    "Expulsa automaticamente membros que atingem o número de infrações definido.",
+    "Expulsa automaticamente membros ao atingir o limite configurado de casos WARN/MUTE.",
   feature_auto_moderation_name: "Moderação automática",
   feature_auto_moderation_desc:
     "Deteta palavras configuradas e aplica WARN/timeout segundo as regras deste servidor.",
@@ -1196,9 +1191,6 @@ window.OzarkLocales.pt = {
   feature_twitch_name: "Alertas de transmissões da Twitch",
   feature_twitch_desc:
     "Publica um alerta quando este canal da Twitch inicia uma transmissão. Verifica o estado a cada 30 segundos e pode mencionar um cargo. Requer uma aplicação Twitch configurada no servidor do bot.",
-  feature_music_commands_name: "Comandos de música",
-  feature_music_commands_desc:
-    "Ativa ou desativa comandos de música e restringe o uso a cargos selecionados.",
   features_test_info_twitch_live:
     "Ligação à Twitch verificada; o canal está em direto.",
   features_test_info_twitch_offline:

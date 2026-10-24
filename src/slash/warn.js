@@ -5,6 +5,7 @@ const logger = require("../systems/logger");
 const warningsService = require("../systems/warningsService");
 const infractionsService = require("../systems/infractionsService");
 const { handleInfractionAutomation } = require("../systems/automation");
+const { checkAutoKick } = require("../systems/autoKick");
 const { tContext } = require("../systems/i18n");
 const { isStaff } = require("./utils");
 const { replyEphemeral, safeReply } = require("../utils/discord");
@@ -12,7 +13,6 @@ const { ensureWarnPermissions } = require("../utils/modPermissions");
 const {
   getGuildTrustConfig,
   getEffectiveMaxWarnings,
-  getEffectiveMuteDuration,
 } = require("../utils/trust");
 
 module.exports = async function warnSlash(client, interaction) {
@@ -95,9 +95,10 @@ module.exports = async function warnSlash(client, interaction) {
       // ignore
     }
 
-    // Automação extra (auto-mute/afins) baseada na infração
+    // O serviço central gere o único auto-mute associado ao WARN.
+    let autoMuteResult = null;
     try {
-      await handleInfractionAutomation({
+      autoMuteResult = await handleInfractionAutomation({
         client,
         guild,
         user: target.user,
@@ -124,56 +125,11 @@ module.exports = async function warnSlash(client, interaction) {
       })
       .catch(() => null);
 
-    // Escalonamento automático: mute se atingir o limite efetivo
-    if (dbUser.warnings >= effectiveMaxWarnings && target.moderatable) {
-      const baseMute =
-        typeof config.muteDuration === "number"
-          ? config.muteDuration
-          : 10 * 60 * 1000;
-
-      const effectiveMute = getEffectiveMuteDuration(
-        baseMute,
-        trustCfg,
-        trustValue,
+    if (autoMuteResult?.muted) {
+      const mins = Math.max(
+        1,
+        Math.round(autoMuteResult.durationMs / 60000),
       );
-
-      const automodMuteReason = await tContext(
-        interaction,
-        "automod.muteReason",
-      );
-      await target.timeout(effectiveMute, automodMuteReason).catch(() => null);
-
-      let afterMuteUser = dbUser;
-      try {
-        afterMuteUser = await warningsService.applyMutePenalty(
-          guild.id,
-          target.id,
-        );
-      } catch {
-        // ignore
-      }
-
-      const trustAfterMute = Number.isFinite(afterMuteUser?.trust)
-        ? afterMuteUser.trust
-        : trustValue;
-
-      let muteInf = null;
-      try {
-        muteInf = await infractionsService.create({
-          guild,
-          user: target.user,
-          moderator: interaction.user,
-          type: "MUTE",
-          reason: automodMuteReason,
-          duration: effectiveMute,
-          source: "slash-escalation",
-        });
-      } catch {
-        // ignore
-      }
-
-      const mins = Math.max(1, Math.round(effectiveMute / 60000));
-
       await interaction
         .followUp({
           content: await tContext(interaction, "automod.mutePublic", {
@@ -182,25 +138,6 @@ module.exports = async function warnSlash(client, interaction) {
           }),
         })
         .catch(() => null);
-
-      const muteCasePrefix = muteInf?.caseId
-        ? `Case: **#${muteInf.caseId}**\n`
-        : "";
-
-      await logger(
-        client,
-        "Slash Mute (Escalation)",
-        target.user,
-        interaction.user,
-        muteCasePrefix +
-          (await tContext(interaction, "log.actions.automodMute", {
-            minutes: mins,
-            trustAfter: trustCfg.enabled
-              ? `${trustAfterMute}/${trustCfg.max}`
-              : "N/A",
-          })),
-        guild,
-      );
     }
 
     // Log do WARN manual
@@ -221,6 +158,7 @@ module.exports = async function warnSlash(client, interaction) {
     } catch {
       // ignore
     }
+    await checkAutoKick(client, guild.id, target.id);
   } catch (err) {
     console.error("[slash/warn] Error:", err);
     return safeReply(

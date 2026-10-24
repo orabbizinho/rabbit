@@ -254,7 +254,7 @@ function registerGiveawaysRoutes(ctx) {
           { guildId },
           { $set: update },
           { upsert: true },
-        ).catch(() => null);
+        );
 
         // Evita servir config obsoleta (cache de 1 min do guildConfigService).
         invalidateGuildConfig(guildId);
@@ -442,8 +442,27 @@ function registerGiveawaysRoutes(ctx) {
             .json({ ok: false, message: "system not ready" });
         }
 
-        await inst.triggerGuild(guildId);
-        return res.json({ ok: true });
+        const result = await inst.triggerGuild(guildId);
+        if (result?.reason === "backoff") {
+          return res.status(429).json({
+            ok: false,
+            reason: result.reason,
+            retryAfterMs: result.retryAfterMs || null,
+          });
+        }
+        if (result?.skipped) {
+          return res.status(409).json({
+            ok: false,
+            reason: result.reason || "skipped",
+          });
+        }
+        if (!result?.ok) {
+          return res.status(502).json({
+            ok: false,
+            error: result?.error || "upstream_error",
+          });
+        }
+        return res.json({ ok: true, sent: Number(result.sent) || 0 });
       } catch (e) {
         return res.status(500).json({
           ok: false,
@@ -510,6 +529,7 @@ function registerGiveawaysRoutes(ctx) {
     canManage,
     rlMedium,
     guardGuildBody,
+    premiumGuard,
     async (req, res) => {
       try {
         const guildId = sanitizeId(req.body.guildId || "");

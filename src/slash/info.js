@@ -28,15 +28,6 @@ const COMMAND_GROUPS = [
       ["/info", "info.commands.info"],
     ],
   },
-  {
-    nameKey: "info.groups.music",
-    commands: [
-      ["/play", "info.commands.play"],
-      ["/stop", "info.commands.stop"],
-      ["/queue", "info.commands.queue"],
-      ["/nowplaying", "info.commands.nowplaying"],
-    ],
-  },
 ];
 
 module.exports = async function infoSlash(_client, interaction) {

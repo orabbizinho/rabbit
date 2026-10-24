@@ -4,6 +4,7 @@ const { EmbedBuilder, PermissionsBitField } = require("discord.js");
 const GuildConfig = require("../database/models/GuildConfig");
 const GiveawayPost = require("../database/models/GiveawayPost");
 const { fetchChannel } = require("../services/discordFetchCache");
+const { isPremiumActive } = require("./premium");
 
 const GAMERPOWER_BASE = "https://www.gamerpower.com/api";
 const FETCH_TIMEOUT_MS = 15_000;
@@ -211,6 +212,10 @@ function effectiveMaxPerCycle(gcfg) {
   return Math.min(HARD_CAP_PER_CYCLE, Math.max(1, Math.round(n)));
 }
 
+function hasGiveawaysPremium(cfg) {
+  return cfg?.premium?.testBypass === true || isPremiumActive(cfg?.premium);
+}
+
 function ensureStatus(guildId, patch = {}) {
   const id = String(guildId);
   const prev = statusByGuild.get(id) || {
@@ -331,9 +336,10 @@ async function postGiveaway(client, channel, g, platform, baseUrl) {
   }
 }
 
-async function processGuild(client, cfg, { force = false } = {}) {
+async function processGuild(client, cfg) {
   const guildId = String(cfg.guildId);
   const gcfg = cfg.giveaways || {};
+  const premiumActive = hasGiveawaysPremium(cfg);
 
   if (runningGuilds.has(guildId))
     return { skipped: true, reason: "already_running" };
@@ -344,11 +350,12 @@ async function processGuild(client, cfg, { force = false } = {}) {
   const channelId = gcfg.channelId ? String(gcfg.channelId) : null;
 
   ensureStatus(guildId, {
-    enabled: gcfg.enabled === true,
+    enabled: gcfg.enabled === true && premiumActive,
     channelId,
     lastPollAt: toIso(now),
     nextPollAt: toIso(now + pollMs),
-    lastError: null,
+    lastError:
+      gcfg.enabled === true && !premiumActive ? "Premium required" : null,
   });
 
   try {
@@ -357,13 +364,21 @@ async function processGuild(client, cfg, { force = false } = {}) {
       return { skipped: true, reason: "disabled" };
     }
 
+    if (!premiumActive) {
+      return { skipped: true, reason: "premium_required" };
+    }
+
     const retryUntil = retryUntilByGuild.get(guildId) || 0;
-    if (!force && retryUntil > now) {
+    if (retryUntil > now) {
       ensureStatus(guildId, {
         lastError: "À espera do Retry-After da GamerPower",
         nextPollAt: toIso(retryUntil),
       });
-      return { skipped: true, reason: "backoff" };
+      return {
+        skipped: true,
+        reason: "backoff",
+        retryAfterMs: retryUntil - now,
+      };
     }
 
     if (!channelId) {
@@ -485,7 +500,16 @@ async function processGuild(client, cfg, { force = false } = {}) {
         lastError: String(err?.message || err).slice(0, 180),
       });
     }
-    return { ok: false, error: err?.message || String(err) };
+    return {
+      ok: false,
+      error: err?.message || String(err),
+      ...(err?.statusCode === 429
+        ? {
+            reason: "backoff",
+            retryAfterMs: Number.isFinite(retryAfterMs) ? retryAfterMs : null,
+          }
+        : {}),
+    };
   } finally {
     runningGuilds.delete(guildId);
   }
@@ -498,7 +522,7 @@ async function triggerGuild(client, guildId) {
   const cfg = await GuildConfig.findOne({ guildId: id }).lean();
   if (!cfg) throw new Error("Guild config not found");
 
-  return processGuild(client, cfg, { force: true });
+  return processGuild(client, cfg);
 }
 
 async function tick(client) {
@@ -530,7 +554,7 @@ async function tick(client) {
     const nextAt = st.nextPollAt ? Date.parse(st.nextPollAt) : 0;
     if (Number.isFinite(nextAt) && nextAt > now) continue;
 
-    await processGuild(client, cfg, { force: false });
+    await processGuild(client, cfg);
   }
 
   for (const [id, st] of statusByGuild.entries()) {
@@ -592,6 +616,12 @@ async function startGiveaways(client) {
 module.exports = startGiveaways;
 module.exports.getStatus = getStatus;
 module.exports.cleanTitle = cleanTitle;
+module.exports._internals = {
+  effectiveMaxPerCycle,
+  hasGiveawaysPremium,
+  processGuild,
+  retryUntilByGuild,
+};
 module.exports.triggerGuild = async function triggerGuildNotReady() {
   throw new Error("Giveaways system not started");
 };

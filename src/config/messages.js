@@ -102,17 +102,6 @@ module.exports = {
         `🧹 Cleared **${count}** messages; **${failed}** could not be deleted.`,
     },
 
-    play: {
-      voiceRequired: "❌ You need to join a voice channel before using /play.",
-      emptyQuery: "❌ You need to provide a song, link, or search query.",
-      noResults: "❌ I could not find results for that search.",
-      sourceBlocked:
-        "❌ The source blocked automated access. Use a direct audio stream or a non-blocked link.",
-      notAudio: "❌ The link did not return audio. Use a direct audio stream.",
-      failed: "❌ I could not play that audio right now.",
-      nowPlaying: ({ title, channel }) => `🎵 Now playing "${title}" in #${channel}.`,
-    },
-
     info: {
       title: ".rabbit | Staff guide",
       description: "Quick reference for the commands available on this server.",
@@ -120,7 +109,6 @@ module.exports = {
       groups: {
         moderation: "Moderation",
         community: "Community",
-        music: "Music",
       },
       commands: {
         warn: "Registers a warning for a member.",
@@ -137,10 +125,6 @@ module.exports = {
         leaderboard: "Shows the server XP leaderboard.",
         help: "Shows a short help summary for members.",
         info: "Opens this full staff guide.",
-        play: "Searches for or plays an audio link in the voice channel.",
-        stop: "Stops playback and clears the queue.",
-        queue: "Shows the tracks waiting in the queue.",
-        nowplaying: "Shows the track currently playing.",
       },
     },
 
@@ -484,17 +468,6 @@ Warnings: **${warnings}/${maxWarnings}**`,
         `🧹 Apaguei **${count}** mensagens; não foi possível apagar **${failed}**.`,
     },
 
-    play: {
-      voiceRequired: "❌ Tens de entrar num canal de voz antes de usar /play.",
-      emptyQuery: "❌ Precisas indicar uma música, link ou pesquisa.",
-      noResults: "❌ Não encontrei resultados para essa pesquisa.",
-      sourceBlocked:
-        "❌ A fonte bloqueou o acesso automatizado. Usa um link direto para um stream de áudio acessível.",
-      notAudio: "❌ O link não devolveu áudio. Usa um link direto para um stream de áudio.",
-      failed: "❌ Não consegui reproduzir esse áudio agora.",
-      nowPlaying: ({ title, channel }) => `🎵 A reproduzir "${title}" no canal #${channel}.`,
-    },
-
     info: {
       title: ".rabbit | Guia da staff",
       description: "Referência rápida dos comandos disponíveis neste servidor.",
@@ -502,7 +475,6 @@ Warnings: **${warnings}/${maxWarnings}**`,
       groups: {
         moderation: "Moderação",
         community: "Comunidade",
-        music: "Música",
       },
       commands: {
         warn: "Regista um aviso para um membro.",
@@ -519,10 +491,6 @@ Warnings: **${warnings}/${maxWarnings}**`,
         leaderboard: "Mostra a tabela de XP do servidor.",
         help: "Apresenta ajuda resumida para membros.",
         info: "Abre este guia completo para a staff.",
-        play: "Pesquisa ou reproduz um link de áudio no canal de voz.",
-        stop: "Para a reprodução e limpa a fila.",
-        queue: "Mostra as faixas em espera.",
-        nowplaying: "Mostra a faixa em reprodução.",
       },
     },
 

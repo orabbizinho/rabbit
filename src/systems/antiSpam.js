@@ -18,6 +18,7 @@ const {
 } = require("../utils/trust");
 const { incrementAntiSpamActions } = require("./status");
 const { getFeature } = require("./featuresService");
+const { checkAutoKick } = require("./autoKick");
 
 function resolveGuildAntiSpamConfig(featureConfig) {
   const feature = featureConfig || {};
@@ -143,10 +144,18 @@ function getUserKey(message) {
   return `${g.id}:${u.id}`;
 }
 
+function shouldSkipAntiSpam(message) {
+  return (
+    !message?.guild ||
+    !message.author ||
+    message.author.bot ||
+    message._autoModActionTaken === true
+  );
+}
+
 async function antiSpam(message, client) {
   try {
-    if (!message.guild) return;
-    if (!message.author || message.author.bot) return;
+    if (shouldSkipAntiSpam(message)) return;
 
     const antiCfg = await getGuildAntiSpamConfig(message.guild.id);
     if (antiCfg.enabled === false) return;
@@ -413,6 +422,8 @@ async function antiSpam(message, client) {
         incrementAntiSpamActions();
       } catch {}
 
+      await checkAutoKick(client, guild.id, message.author.id);
+
       return;
     }
 
@@ -501,6 +512,8 @@ async function antiSpam(message, client) {
     try {
       incrementAntiSpamActions();
     } catch {}
+
+    await checkAutoKick(client, guild.id, message.author.id);
   } catch (err) {
     console.error("[antiSpam] Error:", err);
   }
@@ -508,3 +521,4 @@ async function antiSpam(message, client) {
 
 module.exports = antiSpam;
 module.exports.resolveGuildAntiSpamConfig = resolveGuildAntiSpamConfig;
+module.exports.shouldSkipAntiSpam = shouldSkipAntiSpam;

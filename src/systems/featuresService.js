@@ -112,14 +112,6 @@ const FEATURE_DEFAULTS = {
     channelId: null,
     roleId: null,
   },
-  musicCommands: {
-    enabled: true,
-    playEnabled: true,
-    stopEnabled: true,
-    queueEnabled: true,
-    nowplayingEnabled: true,
-    allowedRoleIds: [],
-  },
 };
 
 const DYNAMIC_TEXT_DEFAULTS = {

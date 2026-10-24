@@ -5,6 +5,7 @@ const { PermissionsBitField } = require("discord.js");
 const config = require("../config/defaultConfig");
 const {
   getGuildTrustConfig,
+  getEffectiveMaxWarnings,
   getEffectiveMuteDuration,
 } = require("../utils/trust");
 const infractionsService = require("./infractionsService");
@@ -12,6 +13,12 @@ const warningsService = require("./warningsService");
 const logger = require("./logger");
 const { fetchMember } = require("../services/discordFetchCache");
 const { tContext } = require("./i18n");
+
+function resolveAutoMuteThreshold(maxWarnings, trustCfg, trustValue) {
+  const base = Number(maxWarnings);
+  if (!Number.isFinite(base) || base <= 0) return null;
+  return getEffectiveMaxWarnings(base, trustCfg, trustValue);
+}
 
 /**
  * Lida com automação após criação de uma infração (por exemplo, WARN).
@@ -56,12 +63,19 @@ async function handleInfractionAutomation(opts) {
       return;
     }
 
-    const threshold =
-      typeof autoMuteCfg.warnsToMute === "number" ? autoMuteCfg.warnsToMute : 3;
-
-    if (!threshold || warnsCount < threshold) {
-      return;
-    }
+    const trustCfg = await getGuildTrustConfig(guild.id);
+    const trustValue =
+      trustUser && typeof trustUser.trust === "number"
+        ? trustUser.trust
+        : typeof trustCfg.base === "number"
+          ? trustCfg.base
+          : 0;
+    const threshold = resolveAutoMuteThreshold(
+      config.maxWarnings,
+      trustCfg,
+      trustValue,
+    );
+    if (threshold === null || warnsCount < threshold) return null;
 
     // Base de duração configurada
     const baseDurationMs =
@@ -70,14 +84,6 @@ async function handleInfractionAutomation(opts) {
         : 10 * 60 * 1000; // 10 minutos por omissão
 
     // Duração efetiva calculada com o mesmo helper usado na dashboard (getEffectiveMuteDuration)
-    const trustCfg = await getGuildTrustConfig(guild.id);
-    const trustValue =
-      trustUser && typeof trustUser.trust === "number"
-        ? trustUser.trust
-        : typeof trustCfg.base === "number"
-          ? trustCfg.base
-          : 0;
-
     const durationMs = getEffectiveMuteDuration(
       baseDurationMs,
       trustCfg,
@@ -93,13 +99,10 @@ async function handleInfractionAutomation(opts) {
     }
 
     try {
-      await member
-        .timeout(durationMs, "Auto-mute (automation)")
-        .catch((err) => {
-          console.warn("[automation] failed timeout:", err?.message || err);
-        });
+      await member.timeout(durationMs, "Auto-mute (automation)");
     } catch (err) {
       console.warn("[automation] timeout threw:", err?.message || err);
+      return null;
     }
 
     // Aplicar penalização de trust associada ao mute
@@ -150,11 +153,14 @@ async function handleInfractionAutomation(opts) {
     } catch {
       // ignore logger errors
     }
+    return { muted: true, durationMs, threshold };
   } catch (err) {
     console.error("[automation] handleInfractionAutomation error:", err);
+    return null;
   }
 }
 
 module.exports = {
   handleInfractionAutomation,
+  resolveAutoMuteThreshold,
 };

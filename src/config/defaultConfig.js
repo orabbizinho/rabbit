@@ -228,8 +228,6 @@ const baseConfig = {
 
     autoMute: {
       enabled: true,
-      // Nº de warns para aplicar mute automático
-      warnsToMute: 3,
       // Duração do mute automático
       muteDurationMs: 30 * 60 * 1000,
     },

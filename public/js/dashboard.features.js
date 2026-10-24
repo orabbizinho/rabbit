@@ -87,6 +87,7 @@
           type: "number",
           name: "infractionsToKick",
           label: "features_infractions",
+          hintKey: "features_auto_kick_hint",
           min: 1,
           max: 100,
         },
@@ -712,25 +713,6 @@
         { type: "role", name: "roleId", label: "features_twitch_role" },
       ],
     },
-    {
-      key: "musicCommands",
-      fields: [
-        { type: "bool", name: "playEnabled", label: "features_music_play" },
-        { type: "bool", name: "stopEnabled", label: "features_music_stop" },
-        { type: "bool", name: "queueEnabled", label: "features_music_queue" },
-        {
-          type: "bool",
-          name: "nowplayingEnabled",
-          label: "features_music_nowplaying",
-        },
-        {
-          type: "multiRole",
-          name: "allowedRoleIds",
-          label: "features_music_roles",
-          hintKey: "features_music_roles_hint",
-        },
-      ],
-    },
   ];
 
   var current = {}; // Valores carregados da API (por funcionalidade).
@@ -894,6 +876,9 @@
         ' value="' +
         esc(v) +
         '" />' +
+        (field.hintKey
+          ? '<p class="hint">' + esc(t(field.hintKey)) + "</p>"
+          : "") +
         "</div>"
       );
     }
@@ -1265,32 +1250,32 @@
         : "features_automod_summary_review";
 
     return (
-      '' +
+      "" +
       '<div class="feature-automod-summary">' +
       '<div class="feature-card__section-label">' +
       esc(t("features_automod_summary_title")) +
       "</div>" +
       '<div class="feature-automod-summary__grid">' +
       '<div class="feature-automod-summary__metric">' +
-      '<span>' +
+      "<span>" +
       esc(t("features_automod_summary_words_pt")) +
       "</span><strong>" +
       esc(ptCount) +
       "</strong></div>" +
       '<div class="feature-automod-summary__metric">' +
-      '<span>' +
+      "<span>" +
       esc(t("features_automod_summary_words_en")) +
       "</span><strong>" +
       esc(enCount) +
       "</strong></div>" +
       '<div class="feature-automod-summary__metric">' +
-      '<span>' +
+      "<span>" +
       esc(t("features_automod_summary_exemptions")) +
       "</span><strong>" +
       esc(exemptionText) +
       "</strong></div>" +
       '<div class="feature-automod-summary__metric is-highlight">' +
-      '<span>' +
+      "<span>" +
       esc(t("features_automod_summary_rules")) +
       "</span><strong>" +
       esc(totalText) +
@@ -1305,7 +1290,9 @@
       ) +
       "</p>" +
       '<div class="feature-automod-summary__state ' +
-      (hintKey === "features_automod_summary_balanced" ? "is-good" : "is-review") +
+      (hintKey === "features_automod_summary_balanced"
+        ? "is-good"
+        : "is-review") +
       '">' +
       esc(t(hintKey)) +
       "</div>" +
@@ -1520,9 +1507,7 @@
           esc(t("features_setup_hint")) +
           "</p>";
     var autoModerationSummary =
-      feature.key === "autoModeration"
-        ? autoModerationSummaryHtml(v)
-        : "";
+      feature.key === "autoModeration" ? autoModerationSummaryHtml(v) : "";
 
     // Pré-visualização (boas-vindas/saída): espelha o embed enviado ao Discord.
     var previewHtml = feature.preview
@@ -2398,10 +2383,7 @@
       configuredFeatures =
         data && data.configuredFeatures ? data.configuredFeatures : {};
       FEATURES.forEach(function (feature) {
-        if (
-          configuredFeatures[feature.key] !== true &&
-          feature.key !== "musicCommands"
-        )
+        if (configuredFeatures[feature.key] !== true)
           current[feature.key] = { enabled: false };
       });
       render();
@@ -2432,7 +2414,9 @@
       grid.querySelectorAll('.feature-card[data-dirty="true"]'),
       function (card) {
         var key = card.getAttribute("data-feature");
-        return JSON.stringify(collect(key)) !== JSON.stringify(current[key] || {});
+        return (
+          JSON.stringify(collect(key)) !== JSON.stringify(current[key] || {})
+        );
       },
     );
   };

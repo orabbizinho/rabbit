@@ -115,12 +115,5 @@ Não é um compromisso rígido, mas um guia de prioridades.
 - Estatísticas do servidor: ✅ – ao desligar, os canais são removidos (`removeGuild` lê os IDs da base de dados quando o payload os omite) e `POST /api/features` devolve os IDs efetivamente persistidos, evitando canais duplicados ao usar “Testar”.
 - Alertas Twitch: 🟡 – atualmente consulta um canal por servidor a cada 30 segundos, em sequência, e guarda a deduplicação em memória. Próximos passos: vários canais por servidor, consulta Helix em lote ou EventSub quando houver endpoint público, estado persistente, política de retry e filtros por categoria/idioma.
 
-## 8. Música no Discord (proposta)
-
-- UX esperada: comandos de pesquisa/reprodução, fila por servidor, faixa atual, pausa/retoma, salto, repetição, aleatório, playlists e permissões de DJ.
-- Arquitetura: sessões isoladas por servidor; adaptadores de fontes explícitas; fila e estado testáveis independentemente da ligação de voz; reconexão e limpeza ao sair do canal.
-- Decisão de fontes é pré-requisito: aceitar apenas APIs, catálogos licenciados ou streams diretos autorizados. Não implementar extração/scraping de áudio do YouTube nem contornar restrições do serviço; consultar os [termos do YouTube](https://www.youtube.com/t/terms) e a [documentação de ligações de voz do Discord](https://docs.discord.com/developers/topics/voice-connections) antes de escolher dependências.
-- Verificar suporte, manutenção e licenças das bibliotecas de voz antes de adicionar dependências; o projeto atualmente não inclui um player de voz.
-
 Este roadmap serve como referência.  
 A cada alteração maior (por exemplo, refactor de um módulo ou adição de uma funcionalidade), recomenda-se atualizar este ficheiro para manter alinhamento entre o código real e os objetivos do projeto.

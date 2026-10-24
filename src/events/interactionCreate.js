@@ -23,14 +23,8 @@ const infoSlash = require("../slash/info");
 const pollSlash = require("../slash/poll");
 const rankSlash = require("../slash/rank");
 const leaderboardSlash = require("../slash/leaderboard");
-const playSlash = require("../slash/play");
-const stopSlash = require("../slash/stop");
-const queueSlash = require("../slash/queue");
-const nowPlayingSlash = require("../slash/nowplaying");
 
 const { getFeature } = require("../systems/featuresService");
-
-const MUSIC_COMMANDS = new Set(["play", "stop", "queue", "nowplaying"]);
 
 let Poll = null;
 try {
@@ -58,10 +52,6 @@ const commandHandlers = new Map([
   ["poll", pollSlash],
   ["rank", rankSlash],
   ["leaderboard", leaderboardSlash],
-  ["play", playSlash],
-  ["stop", stopSlash],
-  ["queue", queueSlash],
-  ["nowplaying", nowPlayingSlash],
 ]);
 
 // Botão de verificação: "verify:<roleId>"
@@ -233,38 +223,6 @@ module.exports = (client) => {
       if (!interaction?.isChatInputCommand?.()) return;
 
       const name = interaction.commandName;
-
-      if (MUSIC_COMMANDS.has(name) && interaction.guildId) {
-        const musicConfig = await getFeature(
-          interaction.guildId,
-          "musicCommands",
-        ).catch(() => null);
-        const enabledKey = `${name}Enabled`;
-        if (musicConfig?.enabled === false || musicConfig?.[enabledKey] === false) {
-          await safeReply(
-            interaction,
-            { content: "Este comando de música está desativado neste servidor." },
-            { ephemeral: true },
-          );
-          return;
-        }
-        const allowedRoleIds = Array.isArray(musicConfig?.allowedRoleIds)
-          ? musicConfig.allowedRoleIds
-          : [];
-        if (
-          allowedRoleIds.length &&
-          !allowedRoleIds.some((roleId) =>
-            interaction.member?.roles?.cache?.has(roleId),
-          )
-        ) {
-          await safeReply(
-            interaction,
-            { content: await tContext(interaction, "common.noPermission") },
-            { ephemeral: true },
-          );
-          return;
-        }
-      }
 
       // Apply bot-wide maintenance before the optional per-guild restriction.
       try {

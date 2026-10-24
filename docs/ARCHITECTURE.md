@@ -25,6 +25,7 @@ Esta nota resume a arquitetura atual do bot, para facilitar manutenção e evolu
     - `status.js` – flags de estado (Mongo ligado, Discord ready, GameNews a correr) usadas pela dashboard.
     - `maintenance.js` – tarefas periódicas (limpeza de logs/infrações antigos, etc.).
     - `gamenews.js` – ciclo de RSS → mensagens no Discord + estado para a dashboard.
+    - `giveaways.js` – ciclo GamerPower → ofertas Free-To-Keep, com deduplicação e verificação Premium.
     - `logger.js` – registo de ações de moderação (Warn/Mute/Kick/Ban, etc.) em Mongo e na cache de logs da dashboard.
     - `temporaryBans.js` – expiração persistente de bans temporários, com validação de marcador e retry após falhas transitórias.
     - outros ficheiros utilitários.

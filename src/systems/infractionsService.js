@@ -3,6 +3,7 @@
 const Infraction = require("../database/models/Infraction");
 const { incrementInfractions } = require("./status");
 const { escapeRegex } = require("../utils/regex");
+const { checkAutoKick, shouldCheckAutoKickImmediately } = require("./autoKick");
 let CaseCounter = null;
 
 try {
@@ -79,6 +80,10 @@ async function create({
   try {
     incrementInfractions();
   } catch {}
+
+  if (shouldCheckAutoKickImmediately(type, source)) {
+    await checkAutoKick(guild.client, guild.id, user.id);
+  }
 
   return doc;
 }
